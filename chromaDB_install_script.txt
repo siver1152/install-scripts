@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#install script for chromaDB for ubuntu 20.04 server
+
+mkdir chroma
+
+cd chroma
+
+suod apt update -y
+
+sudo apt upgrade -y
+
+
+sudo apt install apt-transport-https ca-certificates curl software-properties-common net-tools vim -y
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+
+sudo apt-cache policy docker-ce
+
+sudo apt install docker-ce -y
+
+
+sudo docker pull chromadb/chroma 
+
+docker run -p 8000:8000 -v /home/$USER/chroma/:chroma/chroma chromadb/chroma

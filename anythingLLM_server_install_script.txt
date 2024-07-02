@@ -1,0 +1,34 @@
+#!/bin/bash
+
+#install script for installing AnyThingLLM Server onto ubuntu server 20.04 
+
+
+apt update -y
+
+apt upgrade -y
+
+
+
+git clone https://github.com/Mintplex-Labs/anything-llm.git
+
+cd anything-llm
+
+touch server/storage/anythingllm.db
+
+cd docker/
+
+cp .env.example .env
+
+
+
+apt install apt-transport-https ca-certificates curl software-properties-common net-tools vim -y
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+
+apt-cache policy docker-ce
+
+apt install docker-ce -y
+
+docker compose up
