@@ -1,0 +1,109 @@
+#!/bin/bash
+
+#mass install script for localAI, anythingLLM server, and chromaDB to run all in 1 VM/docker container
+#install script is for the latest ubuntu server 20.04 latest updates and upgrades as of 7/5/2024
+
+# Check if the script is being run as root
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 
+   exit 1
+fi
+
+
+# Function to install docker
+install_program1() {
+    echo "Installing docker..."
+    apt update -y
+    apt upgrade -y
+    apt install apt-transport-https ca-certificates curl software-properties-common net-tools vim -y
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+    apt-cache policy docker-ce
+    apt install docker-ce -y
+    echo "Docker installed successfully."
+}
+
+# Function to install localAI
+install_program2() {
+    echo "Installing LocalAI..."
+    curl https://localai.io/install.sh | sh
+    docker ps
+    echo "LocalAI installed successfully."
+}
+
+# Function to install ChromaDB
+install_program3() {
+    echo "Installing Program 3..."
+    mkdir chroma
+    cd chroma
+    docker pull chromadb/chroma
+    docker run -p 8000:8000 -v /home/$USER/chroma/:chroma/chroma chromadb/chroma
+    echo "ChromaDB installed successfully."
+}
+
+# Function to install anythingLLM Server
+install_program4() {
+    echo "Installing AnyThingLLM Server..."
+    cd ../
+    git clone https://github.com/Mintplex-Labs/anything-llm.git
+    cd anything-llm
+    touch server/storage/anythingllm.db
+    cd docker/
+    cp .env.example .env
+    docker compose up
+    echo "AnyThingLLM Server installed successfully."
+}
+
+
+
+
+# Prompt user for installation choice
+echo "Select the program(s) you want to install:"
+echo "1) Docker"
+echo "2) LocalAI"
+echo "3) ChromaDB"
+echo "4) AnythingLLM Server"
+echo "5) All AI programs no Docker"
+echo "6) All programs"
+echo "7) None"
+
+read -p "Enter your choice [1-7]: " choice
+
+case $choice in
+    1)
+        install_program1
+        ;;
+    2)
+        install_program2
+        ;;
+    3)
+        install_program3
+        ;;
+    4)
+        install_program3
+        ;;
+    5)
+        install_program2
+        install_program3
+        install_program4
+        ;;
+    6)
+        install_program1
+        install_program2
+        install_program3
+        install_program4
+        ;;
+    7)
+        echo "No programs will be installed."
+        ;;
+    *)
+        echo "Invalid choice. Exiting."
+        exit 1
+        ;;
+esac
+
+echo "Script execution completed."
+
+
+
+exit 1
