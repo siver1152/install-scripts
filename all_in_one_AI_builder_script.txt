@@ -9,6 +9,18 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+# Get the username of the user who invoked sudo
+USERNAME=$(logname)
+
+# Get the home directory of that user
+USER_HOME=$(getent passwd "$USERNAME" | cut -d: -f6)
+
+# Change to the user's home directory
+cd "$USER_HOME" || { echo "Failed to change to user's home directory"; exit 1; }
+
+# Confirm directory change
+echo "Changed directory to $USER_HOME"
+
 
 # Function to install docker
 install_program1() {
@@ -31,20 +43,11 @@ install_program2() {
     echo "LocalAI installed successfully."
 }
 
-# Function to install ChromaDB
-install_program3() {
-    echo "Installing Program 3..."
-    mkdir chroma
-    cd chroma
-    docker pull chromadb/chroma
-    docker run -p 8000:8000 -v /home/$USER/chroma/:chroma/chroma chromadb/chroma
-    echo "ChromaDB installed successfully."
-}
-
 # Function to install anythingLLM Server
-install_program4() {
+install_program3() {
     echo "Installing AnyThingLLM Server..."
-    cd ../
+    cd "$USER_HOME" || { echo "Failed to change to user's home directory"; exit 1; }
+    echo "Changed directory to $USER_HOME"
     git clone https://github.com/Mintplex-Labs/anything-llm.git
     cd anything-llm
     touch server/storage/anythingllm.db
@@ -54,15 +57,25 @@ install_program4() {
     echo "AnyThingLLM Server installed successfully."
 }
 
-
+# Function to install ChromaDB
+install_program4() {
+    echo "Installing Program 3..."
+    cd "$USER_HOME" || { echo "Failed to change to user's home directory"; exit 1; }
+    echo "Changed directory to $USER_HOME"
+    mkdir chroma
+    cd chroma
+    docker pull chromadb/chroma
+    docker run -p 8000:8000 -v /home/$USER/chroma/:chroma/chroma chromadb/chroma
+    echo "ChromaDB installed successfully."
+}
 
 
 # Prompt user for installation choice
 echo "Select the program(s) you want to install:"
 echo "1) Docker"
 echo "2) LocalAI"
-echo "3) ChromaDB"
-echo "4) AnythingLLM Server"
+echo "3) AnythingLLM Server"
+echo "4) ChromaDB"
 echo "5) All AI programs no Docker"
 echo "6) All programs"
 echo "7) None"
@@ -80,7 +93,7 @@ case $choice in
         install_program3
         ;;
     4)
-        install_program3
+        install_program4
         ;;
     5)
         install_program2
